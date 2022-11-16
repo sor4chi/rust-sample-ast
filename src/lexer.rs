@@ -40,6 +40,8 @@ impl<'a> Lexer<'a> {
             b'}' => token = Lexer::new_token(TokenKind::RightBrace, self.ch),
             b'[' => token = Lexer::new_token(TokenKind::LeftBracket, self.ch),
             b']' => token = Lexer::new_token(TokenKind::RightBracket, self.ch),
+            b'&' => token = Lexer::new_token(TokenKind::And, self.ch),
+            b'|' => token = Lexer::new_token(TokenKind::Or, self.ch),
             b'0'..=b'9' => {
                 token = Token {
                     kind: TokenKind::Number,
@@ -106,8 +108,7 @@ impl<'a> Lexer<'a> {
 fn test_next_token() {
     let input = r#"
     struct Person {
-        name: string,
-        age: number,
+        name: string | null,
     }
     "#;
     let tests = vec![
@@ -136,20 +137,12 @@ fn test_next_token() {
             literal: "string".to_string(),
         },
         Token {
-            kind: TokenKind::Comma,
-            literal: ",".to_string(),
+            kind: TokenKind::Or,
+            literal: "|".to_string(),
         },
         Token {
-            kind: TokenKind::Ident,
-            literal: "age".to_string(),
-        },
-        Token {
-            kind: TokenKind::Colon,
-            literal: ":".to_string(),
-        },
-        Token {
-            kind: TokenKind::Number,
-            literal: "number".to_string(),
+            kind: TokenKind::Null,
+            literal: "null".to_string(),
         },
         Token {
             kind: TokenKind::Comma,

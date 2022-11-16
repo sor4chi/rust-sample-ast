@@ -3,8 +3,8 @@ use phf::phf_map;
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenKind {
     // Operators
-    And,          // &&
-    Or,           // ||
+    And,          // &
+    Or,           // |
     Colon,        // :
     Comma,        // ,
     LeftParen,    // (
@@ -20,6 +20,7 @@ pub enum TokenKind {
     Number,  // number
     String,  // string
     Boolean, // boolean
+    Null,    // null
 
     // Other
     Ident,
@@ -37,9 +38,5 @@ pub static KEYWORDS: phf::Map<&'static str, TokenKind> = phf_map! {
     "number" => TokenKind::Number,
     "string" => TokenKind::String,
     "boolean" => TokenKind::Boolean,
-};
-
-pub static OPERATORS: phf::Map<&'static str, TokenKind> = phf_map! {
-    "&&" => TokenKind::And,
-    "||" => TokenKind::Or,
+    "null" => TokenKind::Null,
 };
