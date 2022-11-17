@@ -9,7 +9,7 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str) -> Self {
+    pub fn new(input: &str) -> Lexer {
         let mut l = Lexer {
             input,
             position: 0,
@@ -62,18 +62,18 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn read_symbol_token(&mut self) -> String {
+    fn read_symbol_token(&mut self) -> &str {
         let position = self.position;
         self.read_token();
-        self.input[position..self.position].to_string()
+        &self.input[position..self.position]
     }
 
-    fn read_literal_token(&mut self, literal_judger: fn(ch: u8) -> bool) -> String {
+    fn read_literal_token(&mut self, literal_judger: fn(ch: u8) -> bool) -> &str {
         let position = self.position;
         while literal_judger(self.ch) {
             self.read_token();
         }
-        self.input[position..self.position].to_string()
+        &self.input[position..self.position]
     }
 }
 
