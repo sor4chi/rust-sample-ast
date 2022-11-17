@@ -28,7 +28,7 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn next_token(&mut self) -> Token {
-        self.skip_whitespace();
+        self.read_whitespace();
 
         let token;
         match self.ch {
@@ -45,12 +45,12 @@ impl<'a> Lexer<'a> {
             b'0'..=b'9' => {
                 token = Token {
                     kind: TokenKind::Number,
-                    literal: self.read_number(),
+                    literal: self.read_literal(is_number),
                 };
                 return token;
             }
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
-                let ident = self.read_ident();
+                let ident = self.read_literal(is_letter);
                 let kind = KEYWORDS
                     .get(ident.as_str())
                     .unwrap_or(&TokenKind::Ident)
@@ -67,7 +67,7 @@ impl<'a> Lexer<'a> {
         return token;
     }
 
-    fn skip_whitespace(&mut self) {
+    fn read_whitespace(&mut self) {
         while self.ch == b' ' || self.ch == b'\n' || self.ch == b'\t' || self.ch == b'\r' {
             self.read_char();
         }
@@ -83,25 +83,21 @@ impl<'a> Lexer<'a> {
         self.read_position += 1;
     }
 
-    fn read_number(&mut self) -> String {
+    fn read_literal(&mut self, literal_judger: fn(ch: u8) -> bool) -> String {
         let position = self.position;
-        while self.ch >= b'0' && self.ch <= b'9' {
+        while literal_judger(self.ch) {
             self.read_char();
         }
         self.input[position..self.position].to_string()
     }
+}
 
-    fn is_letter(&self, ch: u8) -> bool {
-        (b'a'..=b'z').contains(&ch) || (b'A'..=b'Z').contains(&ch) || ch == b'_'
-    }
+fn is_letter(ch: u8) -> bool {
+    (b'a'..=b'z').contains(&ch) || (b'A'..=b'Z').contains(&ch) || ch == b'_'
+}
 
-    fn read_ident(&mut self) -> String {
-        let position = self.position;
-        while self.is_letter(self.ch) {
-            self.read_char();
-        }
-        self.input[position..self.position].to_string()
-    }
+fn is_number(ch: u8) -> bool {
+    (b'0'..=b'9').contains(&ch)
 }
 
 #[test]
