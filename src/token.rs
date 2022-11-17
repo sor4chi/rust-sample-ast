@@ -45,7 +45,7 @@ pub fn keyword_or_ident(ident: &str) -> TokenKind {
     KEYWORDS.get(ident).unwrap_or(&TokenKind::Ident).clone()
 }
 
-pub static KEYCHARS: phf::Map<&'static str, TokenKind> = phf_map! {
+pub static SYMBOLS: phf::Map<&'static str, TokenKind> = phf_map! {
     ":" => TokenKind::Colon,
     "," => TokenKind::Comma,
     "(" => TokenKind::LeftParen,
@@ -58,6 +58,6 @@ pub static KEYCHARS: phf::Map<&'static str, TokenKind> = phf_map! {
     "|" => TokenKind::Or,
 };
 
-pub fn keychar_or_ident(symbol: &str) -> TokenKind {
-    KEYCHARS.get(symbol).unwrap_or(&TokenKind::Ident).clone()
+pub fn symbol_or_ident(symbol: &str) -> TokenKind {
+    SYMBOLS.get(symbol).unwrap_or(&TokenKind::Ident).clone()
 }

@@ -1,4 +1,4 @@
-use crate::token::{keychar_or_ident, keyword_or_ident, Token, TokenKind, KEYWORDS};
+use crate::token::{keyword_or_ident, symbol_or_ident, Token, TokenKind};
 
 #[derive(Debug)]
 pub struct Lexer<'a> {
@@ -32,13 +32,13 @@ impl<'a> Lexer<'a> {
 
         match self.ch {
             b':' | b',' | b'(' | b')' | b'{' | b'}' | b'[' | b']' | b'&' | b'|' => {
-                let symbol = self.read_char();
-                let kind = keychar_or_ident(&symbol);
+                let symbol = self.read_symbol_token();
+                let kind = symbol_or_ident(&symbol);
                 Lexer::new_token(kind, &symbol)
             }
-            b'0'..=b'9' => Lexer::new_token(TokenKind::Number, &self.read_literal(is_number)),
+            b'0'..=b'9' => Lexer::new_token(TokenKind::Number, &self.read_literal_token(is_number)),
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
-                let ident = self.read_literal(is_letter);
+                let ident = self.read_literal_token(is_letter);
                 let kind = keyword_or_ident(&ident);
                 Lexer::new_token(kind, &ident)
             }
@@ -62,13 +62,13 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn read_char(&mut self) -> String {
+    fn read_symbol_token(&mut self) -> String {
         let position = self.position;
         self.read_token();
         self.input[position..self.position].to_string()
     }
 
-    fn read_literal(&mut self, literal_judger: fn(ch: u8) -> bool) -> String {
+    fn read_literal_token(&mut self, literal_judger: fn(ch: u8) -> bool) -> String {
         let position = self.position;
         while literal_judger(self.ch) {
             self.read_token();
