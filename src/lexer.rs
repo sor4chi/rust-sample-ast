@@ -1,4 +1,4 @@
-use crate::token::{Token, TokenKind, KEYWORDS};
+use crate::token::{keychar_or_ident, keyword_or_ident, Token, TokenKind, KEYWORDS};
 
 #[derive(Debug)]
 pub struct Lexer<'a> {
@@ -16,64 +16,37 @@ impl<'a> Lexer<'a> {
             read_position: 0,
             ch: 0,
         };
-        l.read_char();
-        return l;
+        l.read_token();
+        l
     }
 
-    pub fn new_token(kind: TokenKind, ch: u8) -> Token {
+    fn new_token(kind: TokenKind, literal: &str) -> Token {
         Token {
             kind,
-            literal: String::from_utf8(vec![ch]).unwrap(),
+            literal: literal.to_string(),
         }
     }
 
     pub fn next_token(&mut self) -> Token {
         self.read_whitespace();
 
-        let token;
         match self.ch {
-            b':' => token = Lexer::new_token(TokenKind::Colon, self.ch),
-            b',' => token = Lexer::new_token(TokenKind::Comma, self.ch),
-            b'(' => token = Lexer::new_token(TokenKind::LeftParen, self.ch),
-            b')' => token = Lexer::new_token(TokenKind::RightParen, self.ch),
-            b'{' => token = Lexer::new_token(TokenKind::LeftBrace, self.ch),
-            b'}' => token = Lexer::new_token(TokenKind::RightBrace, self.ch),
-            b'[' => token = Lexer::new_token(TokenKind::LeftBracket, self.ch),
-            b']' => token = Lexer::new_token(TokenKind::RightBracket, self.ch),
-            b'&' => token = Lexer::new_token(TokenKind::And, self.ch),
-            b'|' => token = Lexer::new_token(TokenKind::Or, self.ch),
-            b'0'..=b'9' => {
-                token = Token {
-                    kind: TokenKind::Number,
-                    literal: self.read_literal(is_number),
-                };
-                return token;
+            b':' | b',' | b'(' | b')' | b'{' | b'}' | b'[' | b']' | b'&' | b'|' => {
+                let symbol = self.read_char();
+                let kind = keychar_or_ident(&symbol);
+                Lexer::new_token(kind, &symbol)
             }
+            b'0'..=b'9' => Lexer::new_token(TokenKind::Number, &self.read_literal(is_number)),
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
                 let ident = self.read_literal(is_letter);
-                let kind = KEYWORDS
-                    .get(ident.as_str())
-                    .unwrap_or(&TokenKind::Ident)
-                    .clone();
-                token = Token {
-                    kind,
-                    literal: ident,
-                };
-                return token;
+                let kind = keyword_or_ident(&ident);
+                Lexer::new_token(kind, &ident)
             }
-            _ => token = Lexer::new_token(TokenKind::Illegal, self.ch),
-        }
-        self.read_char();
-        return token;
-    }
-
-    fn read_whitespace(&mut self) {
-        while self.ch == b' ' || self.ch == b'\n' || self.ch == b'\t' || self.ch == b'\r' {
-            self.read_char();
+            _ => Lexer::new_token(TokenKind::Illegal, String::from(self.ch as char).as_str()),
         }
     }
 
-    fn read_char(&mut self) {
+    fn read_token(&mut self) {
         if self.read_position >= self.input.len() {
             self.ch = 0;
         } else {
@@ -83,10 +56,22 @@ impl<'a> Lexer<'a> {
         self.read_position += 1;
     }
 
+    fn read_whitespace(&mut self) {
+        while self.ch == b' ' || self.ch == b'\n' || self.ch == b'\t' || self.ch == b'\r' {
+            self.read_token();
+        }
+    }
+
+    fn read_char(&mut self) -> String {
+        let position = self.position;
+        self.read_token();
+        self.input[position..self.position].to_string()
+    }
+
     fn read_literal(&mut self, literal_judger: fn(ch: u8) -> bool) -> String {
         let position = self.position;
         while literal_judger(self.ch) {
-            self.read_char();
+            self.read_token();
         }
         self.input[position..self.position].to_string()
     }

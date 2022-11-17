@@ -40,3 +40,24 @@ pub static KEYWORDS: phf::Map<&'static str, TokenKind> = phf_map! {
     "boolean" => TokenKind::Boolean,
     "null" => TokenKind::Null,
 };
+
+pub fn keyword_or_ident(ident: &str) -> TokenKind {
+    KEYWORDS.get(ident).unwrap_or(&TokenKind::Ident).clone()
+}
+
+pub static KEYCHARS: phf::Map<&'static str, TokenKind> = phf_map! {
+    ":" => TokenKind::Colon,
+    "," => TokenKind::Comma,
+    "(" => TokenKind::LeftParen,
+    ")" => TokenKind::RightParen,
+    "{" => TokenKind::LeftBrace,
+    "}" => TokenKind::RightBrace,
+    "[" => TokenKind::LeftBracket,
+    "]" => TokenKind::RightBracket,
+    "&" => TokenKind::And,
+    "|" => TokenKind::Or,
+};
+
+pub fn keychar_or_ident(symbol: &str) -> TokenKind {
+    KEYCHARS.get(symbol).unwrap_or(&TokenKind::Ident).clone()
+}
