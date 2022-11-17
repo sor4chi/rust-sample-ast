@@ -27,6 +27,7 @@ pub enum TokenKind {
     Illegal, // Illegal
 }
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub kind: TokenKind,
     pub literal: String,
